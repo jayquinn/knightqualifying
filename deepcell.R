@@ -18,8 +18,12 @@ y_train = read.csv("c://git/knightqualifying/y_train.csv",header=T)
 x_train = read.csv("c://git/knightqualifying/x_train.csv",header=T)
 x_test = read.csv("c://git/knightqualifying/x_test.csv",header=T)
 
+y_train = read.csv('https://raw.githubusercontent.com/Datamanim/dataq/main/y_train.csv',header=T)
+x_train = read.csv('https://raw.githubusercontent.com/Datamanim/dataq/main/X_train.csv',header=T)
+x_test = read.csv('https://raw.githubusercontent.com/Datamanim/dataq/main/X_test.csv',header=T)
 
-#전처리 - 일단 본다
+
+#데이터 살펴보기
 summary(x_train)
 table(x_train$주구매상품)
 table(x_train$주구매지점)
@@ -33,8 +37,13 @@ x_train = cbind(x_train, gender)
 x_train = filter(x_train, 총구매액 > 0 & 최대구매액 > 0)
 
 x_train$환불금액 = ifelse(is.na(x_train$환불금액),0,x_train$환불금액) #NA 0으로 대체
-
-#전처리 - min-max 스케일링: MM, 표준화, 정규화 차이도 보긴 해야할듯
+#값에 특수문자 바꾸기
+table(x_train$주구매상품)
+x_train$주구매상품 = gsub(" ","",x_train$주구매상품)
+x_train$주구매상품 = gsub("/","",x_train$주구매상품)
+table(x_train$주구매지점)
+x_train$주구매지점 = gsub("  ","",x_train$주구매상품)
+#전처리 - min-max 스케일링
 #2,3,4,7,8,9,10
 mm = function(x){
   return( (x-min(x)) / (max(x)-min(x)) )  
@@ -44,28 +53,25 @@ for(i in n){
 x_train[,i] = mm(x_train[,i])}
 summary(x_train)
 
-#전처리 - 명목변수 바꿔주기; one-hot encoding 그냥 더미코딩 ㅡㅡ
+#전처리 - one-hot encoding 
 library(caret)
 x_train$주구매상품 %>% as.factor()-> x_train$주구매상품
 x_train$주구매지점 %>% as.factor()-> x_train$주구매지점
 dmy = dummyVars(~., data = x_train)
 x_train= predict(dmy,newdata=x_train)
 
-mod1 = glm(x_train[,75] ~ x_train[,-c(1,75)], family = binomial())
+x_train = as.data.frame(x_train[,-1])
+mod1 = glm(gender ~ . , family=binomial(), data = x_train)
 summary(mod1)
 
-yhat = predict(mod1,x_test)
-
-
-#### x_test도 전처리 해주기~! ####
-gender = y_test[,2]
-x_test = cbind(x_test, gender)
+########## x_test도 위와 동일한 전처리 #############
+x_test = read.csv('https://raw.githubusercontent.com/Datamanim/dataq/main/X_test.csv',header=T)
 x_test = filter(x_test, 총구매액 > 0 & 최대구매액 > 0)
-
-x_test$환불금액 = ifelse(is.na(x_test$환불금액),0,x_test$환불금액) #NA 0으로 대체
-
-#전처리 - min-max 스케일링: MM, 표준화, 정규화 차이도 보긴 해야할듯
-#2,3,4,7,8,9,10
+x_test$환불금액 = ifelse(is.na(x_test$환불금액),0,x_test$환불금액) 
+x_test$주구매상품 = gsub(" ","",x_test$주구매상품)
+x_test$주구매상품 = gsub("/","",x_test$주구매상품)
+x_test$주구매지점 = gsub("  ","",x_test$주구매상품)
+#test 전처리 - min-max 스케일링
 mm = function(x){
   return( (x-min(x)) / (max(x)-min(x)) )  
 }
@@ -73,14 +79,13 @@ n = c(2,3,4,7,8,9,10)
 for(i in n){
   x_test[,i] = mm(x_test[,i])}
 summary(x_test)
-
-#전처리 - 명목변수 바꿔주기; one-hot encoding 그냥 더미코딩 ㅡㅡ
+#test 전처리 - one-hot encoding
 library(caret)
-x_train$주구매상품 %>% as.factor()-> x_train$주구매상품
-x_train$주구매지점 %>% as.factor()-> x_train$주구매지점
-dmy = dummyVars(~., data = x_train)
-x_train= predict(dmy,newdata=x_train)
-#ROC 평가
-library(pROC)
-prob = predict(mod1, newdata=x_test, type = 'response')
-roc = 
+x_test$주구매상품 %>% as.factor()-> x_test$주구매상품
+x_test$주구매지점 %>% as.factor()-> x_test$주구매지점
+dmy = dummyVars(~., data = x_test)
+x_test= predict(dmy,newdata=x_test)
+##################################################### 
+x_test = as.data.frame(x_test[,-1])
+
+yhat = predict(mod1,x_test)
