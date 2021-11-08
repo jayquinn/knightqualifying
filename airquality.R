@@ -11,3 +11,11 @@ aft = dat1
 sd(aft$Ozone) # 29.3704 대체 이후
 
 
+# 데이터의 순서대로 90%의 데이터를 훈련 데이터로 추출하고,
+# Ozone 항목의 결측값을 평균으로 변경한 후
+# 변경 전 , 후의 중앙값 차이를 구하시오
+dat = airquality
+trainbef = dat[1:nrow(dat),]
+trainaft = dat[1:nrow(dat),]
+trainaft$Ozone[which(is.na(trainaft$Ozone))] = mean(trainaft$Ozone,na.rm=T)
+median(trainbef$Ozone,na.rm=T) - median(trainaft$Ozone)
