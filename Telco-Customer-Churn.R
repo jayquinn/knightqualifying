@@ -1,3 +1,5 @@
+#이탈 Yes 유지 No 예측하기(Churn variable)
+
 dat = read.csv("C:/git/knightqualifying/tcc.csv")
 dat = na.omit(dat)
 #데이터 분할

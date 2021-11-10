@@ -19,3 +19,18 @@ trainbef = dat[1:nrow(dat),]
 trainaft = dat[1:nrow(dat),]
 trainaft$Ozone[which(is.na(trainaft$Ozone))] = mean(trainaft$Ozone,na.rm=T)
 median(trainbef$Ozone,na.rm=T) - median(trainaft$Ozone)
+
+
+# Solar.R에 결측값이 있는 행을 제거하고, 
+# Ozone 항목의 결측값을 중앙값으로 대체한 후,
+# 중앙값으로 대체하기 이전과 이후의 Ozone의 표준편차 차이를 구하시오
+dat = airquality
+nrow(dat)
+dat = dat[-which(is.na(dat$Solar.R)),]
+nrow(dat)
+bef = sd(dat$Ozone,na.rm=T)
+dat$Ozone[which(is.na(dat$Ozone))] = median(dat$Ozone,na.rm=T)
+aft = sd(dat$Ozone)
+abs(bef - aft)
+bef
+aft
