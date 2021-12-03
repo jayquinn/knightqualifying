@@ -1,7 +1,6 @@
 #이탈 Yes 유지 No 예측하기(Churn variable)
-
+library(randomForest)
 dat = read.csv("C:/git/knightqualifying/tcc.csv")
-dat = na.omit(dat)
 #데이터 분할
 tmp = createDataPartition(dat$Churn,p = 0.7)
 x_train = dat[tmp$Resample1,]
@@ -30,3 +29,32 @@ confusionMatrix(y_test$Churn,pred_svm)
 mod_rf = randomForest(y_train$Churn ~.-customerID,x_train,ntree=300)
 pred_rf = predict(mod_rf,newdata=x_test)
 write.csv(pred_rf,"submit.csv")
+
+
+
+
+###################################################################
+dat = read.csv("C:/git/knightqualifying/tcc.csv")
+#데이터 분할
+tmp = createDataPartition(dat$Churn,p = 0.7)
+x_train = dat[tmp$Resample1,]
+y_train = dat[tmp$Resample1,]
+x_test = dat[-tmp$Resample1,]
+y_test = dat[-tmp$Resample1,]
+y_train %>% select(customerID,Churn) -> y_train
+y_test %>% select(customerID,Churn) -> y_test
+inner_join(x_train, y_train) -> train
+inner_join(x_test, y_test) ->test
+
+train$TotalCharges[which(is.na(train$TotalCharges))] <- median(train$TotalCharges,na.rm=T)
+test$TotalCharges[which(is.na(test$TotalCharges))] <- median(test$TotalCharges,na.rm=T)
+
+train$Churn <- as.factor(train$Churn)
+test$Churn <- as.factor(test$Churn)
+
+mod = randomForest(Churn ~. - customerID, data = train,ntree=300)
+answer = predict(mod,newdata = test[-21])
+
+answer %>% as.factor() -> answer
+
+confusionMatrix(test$Churn,answer)
