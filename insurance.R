@@ -1,20 +1,13 @@
-# Charges 항목에서 이상값을 구하시오
+
+
+# Charges 항목에서 이상값의 합을 구하시오
+
 # 평균에서 1.5 표준편차 이상 값
 
 dat = read.csv("C:/git/knightqualifying/insurance.csv")
 
-dat$charges
-crit = sd(dat$charges) * 1.5
-mn = mean(dat$charges)
 
-dat %>% filter(charges >= (crit + mn) | charges <= (mn - crit) ) %>% summarise(sum = sum(charges)) -> view
-
-head(view)
-
-
-
-
-########################
+dat %>% filter(charges >= mean(dat$charges) + sd(dat$charges)*1.5) %>% summarise(hop = sum(charges))
 
 ########## 데이터의 charge 가격을 예측하시오. 채점기준은 RMSE
 
